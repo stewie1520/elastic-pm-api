@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"fmt"
+
 	"github.com/stewie1520/elasticpmapi/config"
 	"github.com/supertokens/supertokens-golang/recipe/dashboard"
 	"github.com/supertokens/supertokens-golang/recipe/session"
@@ -38,6 +40,62 @@ func InitSuperToken(config *config.Config) error {
 								},
 							},
 						},
+					},
+				},
+
+				Override: &tpepmodels.OverrideStruct{
+					Functions: func(originalImplementation tpepmodels.RecipeInterface) tpepmodels.RecipeInterface {
+						originalEmailPasswordSignUp := *originalImplementation.EmailPasswordSignUp
+						originalThirdPartySignInUp := *originalImplementation.ThirdPartySignInUp
+
+						// override the email password sign up function
+						(*originalImplementation.EmailPasswordSignUp) = func(email, password string, tenantId string, userContext supertokens.UserContext) (tpepmodels.SignUpResponse, error) {
+
+							// TODO: some pre sign up logic
+
+							resp, err := originalEmailPasswordSignUp(email, password, tenantId, userContext)
+							if err != nil {
+								return tpepmodels.SignUpResponse{}, err
+							}
+
+							if resp.OK != nil {
+								// TODO: some post sign up logic
+							}
+
+							return resp, err
+						}
+
+						// override the thirdparty sign in / up function
+						(*originalImplementation.ThirdPartySignInUp) = func(thirdPartyID, thirdPartyUserID, email string, oAuthTokens tpmodels.TypeOAuthTokens, rawUserInfoFromProvider tpmodels.TypeRawUserInfoFromProvider, tenantId string, userContext supertokens.UserContext) (tpepmodels.SignInUpResponse, error) {
+
+							// TODO: some pre sign in / up logic
+
+							resp, err := originalThirdPartySignInUp(thirdPartyID, thirdPartyUserID, email, oAuthTokens, rawUserInfoFromProvider, tenantId, userContext)
+							if err != nil {
+								return tpepmodels.SignInUpResponse{}, err
+							}
+
+							if resp.OK != nil {
+								user := resp.OK.User
+								fmt.Println(user)
+
+								accessToken := resp.OK.OAuthTokens["access_token"].(string)
+								firstName := resp.OK.RawUserInfoFromProvider.FromUserInfoAPI["first_name"].(string)
+
+								fmt.Println(accessToken)
+								fmt.Println(firstName)
+
+								if resp.OK.CreatedNewUser {
+									// TODO: Post sign up logic
+								} else {
+									// TODO: Post sign in logic
+								}
+							}
+
+							return resp, err
+						}
+
+						return originalImplementation
 					},
 				},
 			}),

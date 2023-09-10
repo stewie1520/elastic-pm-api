@@ -5,3 +5,4 @@ SUPERTOKENS:
   CONNECTION_URL: http://localhost:3567
   API_KEY: "somekey"
 GIN_MODE: release
+DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgres"

@@ -1,3 +1,6 @@
+# define PATH for db migration
+export MIGRATION_DIR_PATH := db/migrations
+
 .PHONY: clean
 clean:
 	rm -rf ./bin/*
@@ -13,3 +16,11 @@ debug:
 .PHONY: watch
 watch:
 	air
+
+.PHONY: migrate
+migrate:
+	CGO_ENABLED=0 go run -tags migrate github.com/stewie1520/elasticpmapi/cmd/migrate
+
+.PHONY: gen-migration
+gen-migration:
+	migrate create -ext sql -dir ./${MIGRATION_DIR_PATH} -seq $(name)

@@ -8,10 +8,6 @@ import (
 
 func InitApi(app core.App) (*gin.Engine, error) {
 	engine := gin.New()
-	if app.Config().GinMode == "release" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
 	engine.Use(middleware.Cors(app))
 	engine.Use(middleware.SuperToken)
 

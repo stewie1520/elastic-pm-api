@@ -10,7 +10,8 @@ type Config struct {
 		ConnectionUrl string `mapstructure:"CONNECTION_URL"`
 		ApiKey        string `mapstructure:"API_KEY"`
 	} `mapstructure:"SUPERTOKENS"`
-	GinMode string `mapstructure:"GIN_MODE"`
+	GinMode      string `mapstructure:"GIN_MODE"`
+	DATABASE_URL string `mapstructure:"DATABASE_URL"`
 }
 
 func Init() (*Config, error) {
