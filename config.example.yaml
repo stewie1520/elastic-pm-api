@@ -1,0 +1,7 @@
+PORT: 8000
+API_DOMAIN: http://localhost:8000
+WEBSITE_DOMAIN: http://127.0.0.1:5173
+SUPERTOKENS:
+  CONNECTION_URL: http://localhost:3567
+  API_KEY: "somekey"
+GIN_MODE: release
