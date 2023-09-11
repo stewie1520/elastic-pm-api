@@ -1,0 +1,7 @@
+START TRANSACTION;
+
+ALTER TABLE `users` DROP COLUMN `accountId`;
+ALTER TABLE `users` DROP COLUMN `createdAt`;
+ALTER TABLE `users` DROP COLUMN `updatedAt`;
+
+COMMIT;

@@ -7,6 +7,7 @@ import (
 	"github.com/stewie1520/elasticpmapi/api"
 	"github.com/stewie1520/elasticpmapi/config"
 	"github.com/stewie1520/elasticpmapi/core"
+	"github.com/stewie1520/elasticpmapi/usecases"
 )
 
 var debug = flag.Bool("debug", false, "debug mode")
@@ -27,10 +28,10 @@ func main() {
 	err = app.Bootstrap()
 	panicIfError(err)
 
+	usecases.AddHandlersToHook(app)
+
 	router, err := api.InitApi(app)
-	if err != nil {
-		panic(err.Error())
-	}
+	panicIfError(err)
 
 	router.Run(fmt.Sprintf(":%d", cfg.Port))
 }

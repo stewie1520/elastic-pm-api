@@ -5,6 +5,7 @@ sql:
     schema: 
       - "db/migrations/000001_create-user-table.up.sql"
       - "db/migrations/000002_add-name-to-table-user.up.sql"
+      - "db/migrations/000003_update-user-table.up.sql"
     gen:
       go:
         package: "dao_user"

@@ -36,6 +36,7 @@ func initSuperToken(app App) error {
 							ThirdPartyId: "google",
 							Clients: []tpmodels.ProviderClientConfig{
 								{
+									// TODO: replaced with real client id and secret from config
 									ClientID:     "1060725074195-kmeum4crr01uirfl2op9kd5acmi9jutn.apps.googleusercontent.com",
 									ClientSecret: "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",
 								},

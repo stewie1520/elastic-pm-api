@@ -33,10 +33,9 @@ type BaseApp struct {
 
 func NewBaseApp(config BaseAppConfig) *BaseApp {
 	app := &BaseApp{
-		config: config,
+		config:                config,
+		onAfterAccountCreated: &hook.Hook[*AccountCreatedEvent]{},
 	}
-
-	app.registerDefaultHooks()
 
 	return app
 }
@@ -105,9 +104,4 @@ func (app *BaseApp) initDatabase() error {
 
 func (app *BaseApp) createDao(db *sql.DB) *daos.Dao {
 	return daos.New(db)
-}
-
-func (app *BaseApp) registerDefaultHooks() error {
-	app.onAfterAccountCreated = &hook.Hook[*AccountCreatedEvent]{}
-	return nil
 }
