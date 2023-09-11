@@ -1,33 +1,31 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/stewie1520/elasticpmapi/api"
-	"github.com/stewie1520/elasticpmapi/auth"
 	"github.com/stewie1520/elasticpmapi/config"
 	"github.com/stewie1520/elasticpmapi/core"
-	"github.com/stewie1520/elasticpmapi/daos"
-	"github.com/stewie1520/elasticpmapi/db"
 )
+
+var debug = flag.Bool("debug", false, "debug mode")
+
+func init() {
+	flag.Parse()
+}
 
 func main() {
 	cfg, err := config.Init()
-	if err != nil {
-		panic(err.Error())
-	}
+	panicIfError(err)
 
-	if err := auth.InitSuperToken(cfg); err != nil {
-		panic(err.Error())
-	}
+	app := core.NewBaseApp(core.BaseAppConfig{
+		Config:  cfg,
+		IsDebug: *debug,
+	})
 
-	db, err := db.NewPostgresDB(cfg)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	dao := daos.New(db)
-	app := core.NewApp(cfg, dao)
+	err = app.Bootstrap()
+	panicIfError(err)
 
 	router, err := api.InitApi(app)
 	if err != nil {
@@ -35,4 +33,10 @@ func main() {
 	}
 
 	router.Run(fmt.Sprintf(":%d", cfg.Port))
+}
+
+func panicIfError(err error) {
+	if err != nil {
+		panic(err.Error())
+	}
 }

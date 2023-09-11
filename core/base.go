@@ -2,27 +2,57 @@ package core
 
 import (
 	"database/sql"
+	"time"
 
+	"github.com/stewie1520/elasticpmapi/auth"
 	"github.com/stewie1520/elasticpmapi/config"
 	"github.com/stewie1520/elasticpmapi/daos"
+	"github.com/stewie1520/elasticpmapi/db"
+)
+
+const (
+	DefaultDataMaxOpenConns int = 120
+	DefaultDataMaxIdleConns int = 20
 )
 
 var _ App = (*BaseApp)(nil)
 
+type BaseAppConfig struct {
+	*config.Config
+	IsDebug          bool
+	DataMaxOpenConns int
+	DataMaxIdleConns int
+}
+
 type BaseApp struct {
-	config *config.Config
+	config BaseAppConfig
 	dao    *daos.Dao
 }
 
-func (app *BaseApp) Config() *config.Config {
-	return app.config
+func NewBaseApp(config BaseAppConfig) *BaseApp {
+	app := &BaseApp{
+		config: config,
+	}
+
+	// TODO: register hooks here
+
+	return app
 }
 
-func NewApp(config *config.Config, dao *daos.Dao) *BaseApp {
-	return &BaseApp{
-		config: config,
-		dao:    dao,
+func (app *BaseApp) Bootstrap() error {
+	if err := app.initDatabase(); err != nil {
+		return err
 	}
+
+	if err := auth.InitSuperToken(app.config.Config); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (app *BaseApp) IsDebug() bool {
+	return app.config.IsDebug
 }
 
 func (app *BaseApp) Dao() *daos.Dao {
@@ -35,4 +65,38 @@ func (app *BaseApp) DB() *sql.DB {
 	}
 
 	return app.Dao().DB()
+}
+
+func (app *BaseApp) Config() *config.Config {
+	return app.config.Config
+}
+
+func (app *BaseApp) initDatabase() error {
+	maxOpenConns := DefaultDataMaxOpenConns
+	maxIdleConns := DefaultDataMaxIdleConns
+
+	if app.config.DataMaxOpenConns > 0 {
+		maxOpenConns = app.config.DataMaxOpenConns
+	}
+
+	if app.config.DataMaxIdleConns > 0 {
+		maxIdleConns = app.config.DataMaxIdleConns
+	}
+
+	db, err := db.NewPostgresDB(app.config.DATABASE_URL)
+	if err != nil {
+		return err
+	}
+
+	db.SetMaxIdleConns(maxIdleConns)
+	db.SetMaxOpenConns(maxOpenConns)
+	db.SetConnMaxIdleTime(5 * time.Minute)
+
+	app.dao = app.createDao(db)
+
+	return nil
+}
+
+func (app *BaseApp) createDao(db *sql.DB) *daos.Dao {
+	return daos.New(db)
 }

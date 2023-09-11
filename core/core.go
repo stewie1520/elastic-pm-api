@@ -8,8 +8,10 @@ import (
 )
 
 type App interface {
-	Config() *config.Config
-
 	DB() *sql.DB
 	Dao() *daos.Dao
+
+	Bootstrap() error
+	Config() *config.Config
+	IsDebug() bool
 }

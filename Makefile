@@ -11,7 +11,7 @@ build: clean
 
 .PHONY: debug
 debug:
-	dlv debug --headless --only-same-user --listen :2345 --api-version 2 ./cmd/main/main.go
+	dlv debug --headless --only-same-user --listen :2345 --api-version 2 ./cmd/main/main.go -- -debug=true
 
 .PHONY: watch
 watch:
