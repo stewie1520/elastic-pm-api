@@ -24,3 +24,7 @@ migrate:
 .PHONY: gen-migration
 gen-migration:
 	migrate create -ext sql -dir ./${MIGRATION_DIR_PATH} -seq $(name)
+
+.PHONY: gen-sqlc
+gen-sqlc:
+	sqlc generate

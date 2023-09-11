@@ -7,6 +7,8 @@ import (
 	"github.com/stewie1520/elasticpmapi/auth"
 	"github.com/stewie1520/elasticpmapi/config"
 	"github.com/stewie1520/elasticpmapi/core"
+	"github.com/stewie1520/elasticpmapi/daos"
+	"github.com/stewie1520/elasticpmapi/db"
 )
 
 func main() {
@@ -19,7 +21,14 @@ func main() {
 		panic(err.Error())
 	}
 
-	app := core.NewApp(cfg)
+	db, err := db.NewPostgresDB(cfg)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	dao := daos.New(db)
+	app := core.NewApp(cfg, dao)
+
 	router, err := api.InitApi(app)
 	if err != nil {
 		panic(err.Error())
