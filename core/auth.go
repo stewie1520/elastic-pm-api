@@ -1,9 +1,8 @@
-package auth
+package core
 
 import (
 	"fmt"
 
-	"github.com/stewie1520/elasticpmapi/config"
 	"github.com/supertokens/supertokens-golang/recipe/dashboard"
 	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/recipe/thirdparty/tpmodels"
@@ -12,7 +11,9 @@ import (
 	"github.com/supertokens/supertokens-golang/supertokens"
 )
 
-func InitSuperToken(config *config.Config) error {
+func initSuperToken(app App) error {
+	config := app.Config()
+
 	apiBasePath := "/auth"
 	websiteBasePath := "/auth"
 	err := supertokens.Init(supertokens.TypeInput{
@@ -50,16 +51,19 @@ func InitSuperToken(config *config.Config) error {
 
 						// override the email password sign up function
 						(*originalImplementation.EmailPasswordSignUp) = func(email, password string, tenantId string, userContext supertokens.UserContext) (tpepmodels.SignUpResponse, error) {
-
-							// TODO: some pre sign up logic
-
 							resp, err := originalEmailPasswordSignUp(email, password, tenantId, userContext)
 							if err != nil {
 								return tpepmodels.SignUpResponse{}, err
 							}
 
 							if resp.OK != nil {
-								// TODO: some post sign up logic
+								app.OnAfterAccountCreated().Trigger(&AccountCreatedEvent{
+									ID:         resp.OK.User.ID,
+									Email:      resp.OK.User.Email,
+									TimeJoined: resp.OK.User.TimeJoined,
+									ThirdParty: resp.OK.User.ThirdParty,
+									TenantIds:  resp.OK.User.TenantIds,
+								})
 							}
 
 							return resp, err
@@ -67,9 +71,6 @@ func InitSuperToken(config *config.Config) error {
 
 						// override the thirdparty sign in / up function
 						(*originalImplementation.ThirdPartySignInUp) = func(thirdPartyID, thirdPartyUserID, email string, oAuthTokens tpmodels.TypeOAuthTokens, rawUserInfoFromProvider tpmodels.TypeRawUserInfoFromProvider, tenantId string, userContext supertokens.UserContext) (tpepmodels.SignInUpResponse, error) {
-
-							// TODO: some pre sign in / up logic
-
 							resp, err := originalThirdPartySignInUp(thirdPartyID, thirdPartyUserID, email, oAuthTokens, rawUserInfoFromProvider, tenantId, userContext)
 							if err != nil {
 								return tpepmodels.SignInUpResponse{}, err
@@ -86,9 +87,13 @@ func InitSuperToken(config *config.Config) error {
 								fmt.Println(firstName)
 
 								if resp.OK.CreatedNewUser {
-									// TODO: Post sign up logic
-								} else {
-									// TODO: Post sign in logic
+									app.OnAfterAccountCreated().Trigger(&AccountCreatedEvent{
+										ID:         resp.OK.User.ID,
+										Email:      resp.OK.User.Email,
+										TimeJoined: resp.OK.User.TimeJoined,
+										ThirdParty: resp.OK.User.ThirdParty,
+										TenantIds:  resp.OK.User.TenantIds,
+									})
 								}
 							}
 

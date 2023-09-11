@@ -9,13 +9,13 @@ import (
 type Dao struct {
 	db *sql.DB
 
-	userQueries *dao_user.Queries
+	UserQueries *dao_user.Queries
 }
 
 func New(db *sql.DB) *Dao {
 	return &Dao{
 		db:          db,
-		userQueries: dao_user.New(db),
+		UserQueries: dao_user.New(db),
 	}
 }
 

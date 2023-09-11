@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/stewie1520/elasticpmapi/auth"
 	"github.com/stewie1520/elasticpmapi/config"
 	"github.com/stewie1520/elasticpmapi/daos"
 	"github.com/stewie1520/elasticpmapi/db"
+	hook "github.com/stewie1520/elasticpmapi/hooks"
 )
 
 const (
@@ -27,6 +27,8 @@ type BaseAppConfig struct {
 type BaseApp struct {
 	config BaseAppConfig
 	dao    *daos.Dao
+
+	onAfterAccountCreated *hook.Hook[*AccountCreatedEvent]
 }
 
 func NewBaseApp(config BaseAppConfig) *BaseApp {
@@ -34,7 +36,7 @@ func NewBaseApp(config BaseAppConfig) *BaseApp {
 		config: config,
 	}
 
-	// TODO: register hooks here
+	app.registerDefaultHooks()
 
 	return app
 }
@@ -44,7 +46,7 @@ func (app *BaseApp) Bootstrap() error {
 		return err
 	}
 
-	if err := auth.InitSuperToken(app.config.Config); err != nil {
+	if err := initSuperToken(app); err != nil {
 		return err
 	}
 
@@ -69,6 +71,10 @@ func (app *BaseApp) DB() *sql.DB {
 
 func (app *BaseApp) Config() *config.Config {
 	return app.config.Config
+}
+
+func (app *BaseApp) OnAfterAccountCreated() *hook.Hook[*AccountCreatedEvent] {
+	return app.onAfterAccountCreated
 }
 
 func (app *BaseApp) initDatabase() error {
@@ -99,4 +105,9 @@ func (app *BaseApp) initDatabase() error {
 
 func (app *BaseApp) createDao(db *sql.DB) *daos.Dao {
 	return daos.New(db)
+}
+
+func (app *BaseApp) registerDefaultHooks() error {
+	app.onAfterAccountCreated = &hook.Hook[*AccountCreatedEvent]{}
+	return nil
 }
