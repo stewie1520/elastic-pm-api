@@ -6,15 +6,15 @@ package dao_user
 
 import (
 	"database/sql"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/stewie1520/elasticpmapi/tools/types"
 )
 
 type User struct {
 	ID        uuid.UUID      `json:"id"`
 	FullName  sql.NullString `json:"fullName"`
 	AccountId string         `json:"accountId"`
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
+	CreatedAt types.DateTime `json:"createdAt"`
+	UpdatedAt types.DateTime `json:"updatedAt"`
 }

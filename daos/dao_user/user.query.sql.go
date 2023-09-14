@@ -8,9 +8,9 @@ package dao_user
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/stewie1520/elasticpmapi/tools/types"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -21,8 +21,8 @@ type CreateUserParams struct {
 	ID        uuid.UUID      `json:"id"`
 	FullName  sql.NullString `json:"fullName"`
 	AccountId string         `json:"accountId"`
-	CreatedAt time.Time      `json:"createdAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
+	CreatedAt types.DateTime `json:"createdAt"`
+	UpdatedAt types.DateTime `json:"updatedAt"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -50,6 +50,23 @@ SELECT id, "fullName", "accountId", "createdAt", "updatedAt" FROM "users" WHERE 
 
 func (q *Queries) FindUserById(ctx context.Context, id uuid.UUID) (User, error) {
 	row := q.db.QueryRowContext(ctx, findUserById, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FullName,
+		&i.AccountId,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByAccountID = `-- name: GetUserByAccountID :one
+SELECT id, "fullName", "accountId", "createdAt", "updatedAt" FROM "users" WHERE "users"."accountId" = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserByAccountID(ctx context.Context, accountid string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByAccountID, accountid)
 	var i User
 	err := row.Scan(
 		&i.ID,

@@ -59,8 +59,8 @@ func (command *CreateUserCommand) Execute() error {
 		ID:        uuid.New(),
 		FullName:  sql.NullString{}, // TODO: add fake name
 		AccountId: command.ID,
-		CreatedAt: createdAt.Time(),
-		UpdatedAt: updatedAt.Time(),
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	})
 
 	return nil

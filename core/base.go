@@ -88,20 +88,18 @@ func (app *BaseApp) initDatabase() error {
 		maxIdleConns = app.config.DataMaxIdleConns
 	}
 
-	db, err := db.NewPostgresDB(app.config.DATABASE_URL)
+	db, err := db.NewPostgresDB(
+		app.config.DATABASE_URL,
+		db.WithConnMaxIdleTime(time.Duration(maxIdleConns)),
+		db.WithMaxIdleConns(maxIdleConns),
+		db.WithMaxOpenConns(maxOpenConns),
+	)
+
 	if err != nil {
 		return err
 	}
 
-	db.SetMaxIdleConns(maxIdleConns)
-	db.SetMaxOpenConns(maxOpenConns)
-	db.SetConnMaxIdleTime(5 * time.Minute)
-
-	app.dao = app.createDao(db)
+	app.dao = daos.New(db)
 
 	return nil
-}
-
-func (app *BaseApp) createDao(db *sql.DB) *daos.Dao {
-	return daos.New(db)
 }

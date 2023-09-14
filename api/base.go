@@ -17,5 +17,7 @@ func InitApi(app core.App) (*gin.Engine, error) {
 	engine.Use(middleware.Cors(app))
 	engine.Use(middleware.SuperToken)
 
+	bindUserApi(app, engine)
+
 	return engine, nil
 }

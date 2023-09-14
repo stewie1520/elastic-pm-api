@@ -3,19 +3,22 @@ package daos
 import (
 	"database/sql"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/stewie1520/elasticpmapi/daos/dao_user"
 )
 
 type Dao struct {
 	db *sql.DB
 
-	User *dao_user.Queries
+	Builder squirrel.StatementBuilderType
+	User    *dao_user.Queries
 }
 
 func New(db *sql.DB) *Dao {
 	return &Dao{
-		db:   db,
-		User: dao_user.New(db),
+		db:      db,
+		User:    dao_user.New(db),
+		Builder: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 }
 
