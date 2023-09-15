@@ -1,3 +1,5 @@
+## This repo is moved to [Orgelastic](https://github.com/orgelastic/elastic-pm-api)
+
 ## Getting Started 🎃
 
 ```sh
